@@ -11,6 +11,7 @@ import {
   ArrowRight,
   UserPlus,
   Camera,
+  CheckCircle,
 } from 'lucide-react';
 
 const RegisterPage = () => {
@@ -26,6 +27,8 @@ const RegisterPage = () => {
   const [petPhoto, setPetPhoto] = useState(null);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [serverMessage, setServerMessage] = useState('');
 
   const validateStep1 = () => {
     const newErrors = {};
@@ -75,24 +78,112 @@ const RegisterPage = () => {
     setStep(1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
+    setErrors({});
+    setServerMessage('');
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log('Registration submitted with:', {
-        fullName,
-        email,
-        password,
-        petName,
-        petBreed,
-        petAge,
-        petPhoto,
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('fullName', fullName);
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('petName', petName);
+      formData.append('petBreed', petBreed);
+      formData.append('petAge', petAge);
+      
+      if (petPhoto) {
+        formData.append('petPhoto', petPhoto);
+      }
+
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        body: formData,
       });
-      // Here you would normally redirect to success page or login
-    }, 1500);
+
+      const data = await response.json();
+
+      if (data.success) {
+        setRegistrationSuccess(true);
+        setServerMessage('Registration successful! Welcome to Petfectly!');
+        console.log('User registered:', data.user);
+        
+        // Optionally redirect after a delay
+        setTimeout(() => {
+          // window.location.href = '/login'; // Uncomment if you have a login page
+          console.log('Would redirect to login page');
+        }, 2000);
+      } else {
+        setServerMessage(data.message || 'Registration failed');
+        if (data.errors) {
+          const errorObj = {};
+          data.errors.forEach(error => {
+            // Map server errors to form fields
+            if (error.includes('email') || error.includes('Email')) {
+              errorObj.email = error;
+            } else if (error.includes('password') || error.includes('Password')) {
+              errorObj.password = error;
+            } else if (error.includes('name') || error.includes('Name')) {
+              errorObj.fullName = error;
+            }
+          });
+          setErrors(errorObj);
+        }
+        
+        // If it's an email error, go back to step 1
+        if (data.message?.includes('email') || data.message?.includes('Email')) {
+          setStep(1);
+        }
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setServerMessage('Network error. Please check if the server is running on http://localhost:5000');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // Success screen
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <header className="p-4 flex items-center justify-center bg-white border-b border-gray-100">
+          <div className="flex items-center">
+            <Dog className="text-pink-500" size={28} />
+            <h1 className="text-2xl font-bold ml-2 bg-gradient-to-r from-pink-500 to-red-500 text-transparent bg-clip-text">
+              Petfectly
+            </h1>
+          </div>
+        </header>
+
+        <main className="flex-grow flex flex-col items-center justify-center p-6">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="mb-6">
+              <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Petfectly!</h2>
+              <p className="text-gray-600">{serverMessage}</p>
+            </div>
+            
+            <div className="space-y-4">
+              <button 
+                onClick={() => console.log('Navigate to dashboard')}
+                className="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-xl font-medium hover:from-pink-600 hover:to-red-600 transition-colors"
+              >
+                Get Started
+              </button>
+              <button 
+                onClick={() => console.log('Navigate to login')}
+                className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+              >
+                Login Instead
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -119,6 +210,17 @@ const RegisterPage = () => {
                 : 'Tell us about your furry friend'}
             </p>
           </div>
+
+          {/* Server Message */}
+          {serverMessage && (
+            <div className={`mb-4 p-3 rounded-lg text-sm ${
+              registrationSuccess 
+                ? 'bg-green-100 text-green-700 border border-green-200' 
+                : 'bg-red-100 text-red-700 border border-red-200'
+            }`}>
+              {serverMessage}
+            </div>
+          )}
 
           {/* Progress steps */}
           <div className="flex justify-center mb-8">
