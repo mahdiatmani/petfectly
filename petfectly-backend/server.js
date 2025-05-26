@@ -264,3 +264,28 @@ app.use((error, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// GET /api/pets — return every user’s petInfo as a pet list
+app.get('/api/pets', async (req, res) => {
+  try {
+    // fetch all users (we assume each has one petInfo)
+    const users = await User.find({}).select('petInfo fullName');
+
+    // map to a pets array
+    const pets = users.map(u => ({
+      id: u._id.toString(),
+      name: u.petInfo.name,
+      breed: u.petInfo.breed,
+      age: u.petInfo.age,
+      photoUrl: u.petInfo.photo
+        ? `${req.protocol}://${req.get('host')}/uploads/${u.petInfo.photo}`
+        : null,
+      ownerName: u.fullName
+    }));
+
+    res.json({ success: true, pets });
+  } catch (err) {
+    console.error('Error fetching pets:', err);
+    res.status(500).json({ success: false, message: 'Could not fetch pets' });
+  }
+});
