@@ -628,7 +628,95 @@ const MatchPopup: React.FC<MatchPopupProps> = ({
 };
 
 // Messages Item Component
+
+
+// Messages Item Component
 const MessageItem: React.FC<MessageItemProps> = ({
+  pet,
+  unread = false,
+  lastMessage = 'Tap to start chatting',
+}) => {
+  const [isPressed, setIsPressed] = useState(false);
+  
+  return (
+    <div 
+      className={`relative flex items-center p-4 bg-white rounded-2xl mb-3 cursor-pointer transform transition-all duration-200 ${
+        isPressed ? 'scale-95' : 'scale-100'
+      } hover:shadow-lg hover:scale-[1.02] active:scale-95`}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      style={{
+        background: unread 
+          ? 'linear-gradient(135deg, #fff 0%, #fef2f2 100%)' 
+          : 'white',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+      }}
+    >
+      {/* Unread indicator bar */}
+      {unread && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-pink-500 to-red-500 rounded-r-full"></div>
+      )}
+      
+      <div className="relative">
+        <div className="w-14 h-14 rounded-2xl overflow-hidden mr-3 ring-2 ring-gray-100">
+          <img
+            src={pet.images[0]}
+            alt={pet.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        {unread && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-pink-500 to-red-500 rounded-full border-2 border-white animate-pulse"></div>
+        )}
+        {/* Online status indicator */}
+        {pet.lastActive === '10 min ago' && (
+          <div className="absolute bottom-0 right-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+        )}
+      </div>
+      
+      <div className="flex-grow">
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3 className={`font-semibold ${unread ? 'text-gray-900' : 'text-gray-700'}`}>
+            {pet.name}
+          </h3>
+          {unread && (
+            <span className="text-xs bg-gradient-to-r from-pink-500 to-red-500 text-white px-2 py-0.5 rounded-full">
+              New
+            </span>
+          )}
+        </div>
+        <p className={`text-sm truncate ${unread ? 'text-gray-700 font-medium' : 'text-gray-500'}`}>
+          {lastMessage}
+        </p>
+      </div>
+      
+      <div className="flex flex-col items-end gap-1">
+        <div className="text-xs text-gray-400">{pet.lastActive}</div>
+        {unread && (
+          <div className="w-5 h-5 bg-gradient-to-br from-pink-500 to-red-500 rounded-full text-white text-[10px] font-semibold flex items-center justify-center">
+            2
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*const MessageItem: React.FC<MessageItemProps> = ({
   pet,
   unread = false,
   lastMessage = 'Tap to start chatting',
@@ -654,8 +742,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
       <div className="text-xs text-gray-400">{pet.lastActive}</div>
     </div>
   );
-};
-
+};*/
 // Empty State Component
 const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
