@@ -25,6 +25,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 
+
 // CSS animations as a style element
 const animationStyles = `
   @keyframes bounce-in {
@@ -836,6 +837,7 @@ const DiscoverContent: React.FC<DiscoverContentProps> = ({ petSwiper }) => {
 const MessagesContent: React.FC<MessagesContentProps> = ({ matches }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'unread', 'online'
 
   const filteredMatches = matches.filter((pet) => {
@@ -997,7 +999,7 @@ const MessagesContent: React.FC<MessagesContentProps> = ({ matches }) => {
               Keep swiping to find perfect pet friends. Your next match is just a swipe away!
             </p>
             <button 
-              onClick={() => setActiveFilter('all')}
+              onClick={() => router.push('/?tab=discover')}
               className="mt-6 px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
               Start Swiping
