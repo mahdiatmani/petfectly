@@ -68,6 +68,8 @@ const LoginPage = () => {
       if (data.success) {
         setLoginSuccess(true);
         setUserData(data.user);
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        sessionStorage.setItem('pet',  JSON.stringify(data.pet));
         setServerMessage(`Welcome back, ${data.user.fullName}!`);
         console.log('User logged in:', data.user);
         
