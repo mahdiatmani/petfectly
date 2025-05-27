@@ -899,24 +899,25 @@ const ProfileContent: React.FC = () => {
   const [activeSettings, setActiveSettings] = useState('info'); // 'info', 'photos', 'preferences'
   const router = useRouter();
 
+  const storedUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+  const storedPet  = JSON.parse(sessionStorage.getItem('pet')  || '{}');
   const user = {
-    name: 'Charlie',
-    bio: 'Playful Labrador who loves beaches, parks, and making new friends. Always up for an adventure or a good nap!',
-    age: '3 years',
-    breed: 'Labrador Retriever',
-    photos: [
-      '/api/placeholder/200/200',
-      '/api/placeholder/200/200',
-      '/api/placeholder/200/200',
-    ],
-    interests: ['Beach', 'Parks', 'Toys', 'Naps'],
-    personality: ['Friendly', 'Energetic', 'Loving'],
+
+   name:        storedPet.name        || 'Unknown',
+    bio:         storedPet.bio         || '',            // if you later add a bio field
+    age:         storedPet.age         || '',
+    breed:       storedPet.breed       || '',
+    photos:      (storedPet.images || []).map((img: string) =>
+                    `http://localhost:5000${img}`
+                 ),
+    interests:   storedPet.interests   || [],
+    personality: storedPet.personality || [],
   };
 
   return (
     <div className="h-full flex flex-col p-4">
-      <div className="text-center mb-6">
-        <ProfilePhoto url={user.photos[0]} editable={true} size="large" />
+      <div className="mb-6 flex flex-col items-center">
+        <ProfilePhoto url={user.photos[0] || ''} editable size="large" />
         <h2 className="text-xl font-bold mt-3">{user.name}</h2>
         <div className="inline-flex items-center bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600 mt-1">
           <Dog size={14} className="mr-1" />

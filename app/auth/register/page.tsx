@@ -70,6 +70,7 @@ const RegisterPage = () => {
     if (step === 1 && validateStep1()) {
       setStep(2);
     } else if (step === 2 && validateStep2()) {
+      
       handleSubmit();
     }
   };
@@ -107,7 +108,9 @@ const RegisterPage = () => {
       if (data.success) {
         setRegistrationSuccess(true);
         setServerMessage('Registration successful! Welcome to Petfectly!');
-        console.log('User registered:', data.user);
+        sessionStorage.setItem('user', JSON.stringify(data.user));
++       sessionStorage.setItem('pet',  JSON.stringify(data.pet));
++       console.log('User registered:', data.user);
         
         // Optionally redirect after a delay
         setTimeout(() => {
