@@ -74,7 +74,7 @@ const LoginPage = () => {
         
         // Optionally redirect after a delay
         setTimeout(() => {
-          window.location.href = '/'; // Uncomment if you have a dashboard
+          // window.location.href = '/'; // Uncomment if you have a dashboard
           console.log('Would redirect to dashboard');
         }, 2000);
       } else {
