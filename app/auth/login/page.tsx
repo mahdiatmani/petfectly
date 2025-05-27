@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dog,
   Mail,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 const LoginPage = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -69,14 +71,13 @@ const LoginPage = () => {
         setServerMessage(`Welcome back, ${data.user.fullName}!`);
         console.log('User logged in:', data.user);
         
-        // Store user data in sessionStorage (you can also use localStorage)
+        // Store user data in sessionStorage
         sessionStorage.setItem('user', JSON.stringify(data.user));
         
-        // Optionally redirect after a delay
+        // Auto-redirect to dashboard after 2 seconds
         setTimeout(() => {
-          // window.location.href = '/'; // Uncomment if you have a dashboard
-          console.log('Would redirect to dashboard');
-        }, 2000);
+          router.push('/');
+        }, 5000);
       } else {
         setServerMessage(data.message || 'Login failed');
         if (data.message?.includes('email') || data.message?.includes('password')) {
@@ -140,16 +141,16 @@ const LoginPage = () => {
             
             <div className="space-y-4">
               <button 
-                onClick={() => console.log('Navigate to dashboard')}
+                onClick={() => router.push('/')}
                 className="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-xl font-medium hover:from-pink-600 hover:to-red-600 transition-colors"
               >
                 Go to Dashboard
               </button>
               <button 
-                onClick={() => console.log('Find pet playdates')}
+                onClick={() => router.push('/?tab=profile')}
                 className="w-full px-6 py-3 border border-pink-300 text-pink-600 rounded-xl font-medium hover:bg-pink-50 transition-colors"
               >
-                Visite Profile
+                Visit Profile
               </button>
             </div>
           </div>
@@ -179,12 +180,8 @@ const LoginPage = () => {
           </div>
 
           {/* Server Message */}
-          {serverMessage && (
-            <div className={`mb-6 p-3 rounded-lg text-sm ${
-              loginSuccess 
-                ? 'bg-green-100 text-green-700 border border-green-200' 
-                : 'bg-red-100 text-red-700 border border-red-200'
-            }`}>
+          {serverMessage && !loginSuccess && (
+            <div className="mb-6 p-3 rounded-lg text-sm bg-red-100 text-red-700 border border-red-200">
               {serverMessage}
             </div>
           )}

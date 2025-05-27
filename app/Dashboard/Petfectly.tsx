@@ -23,6 +23,9 @@ import {
   Filter,
 } from 'lucide-react';
 
+import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+
 // CSS animations as a style element
 const animationStyles = `
   @keyframes bounce-in {
@@ -227,8 +230,6 @@ const updatePetLike = async (petId: number, liked: boolean): Promise<void> => {
     throw error;
   }
 };
-
-
 
 // Custom hook for swipe gestures
 const useSwipeGesture = (
@@ -595,9 +596,6 @@ const MatchPopup: React.FC<MatchPopupProps> = ({
 };
 
 // Messages Item Component
-
-
-// Messages Item Component
 const MessageItem: React.FC<MessageItemProps> = ({
   pet,
   unread = false,
@@ -670,46 +668,6 @@ const MessageItem: React.FC<MessageItemProps> = ({
   );
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*const MessageItem: React.FC<MessageItemProps> = ({
-  pet,
-  unread = false,
-  lastMessage = 'Tap to start chatting',
-}) => {
-  return (
-    <div className="flex items-center p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors cursor-pointer">
-      <div className="relative">
-        <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-          <img
-            src={pet.images[0]}
-            alt={pet.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        {unread && (
-          <div className="absolute top-0 right-0 w-3 h-3 bg-pink-500 rounded-full border-2 border-white"></div>
-        )}
-      </div>
-      <div className="flex-grow">
-        <h3 className="font-semibold">{pet.name}</h3>
-        <p className="text-gray-500 text-sm truncate">{lastMessage}</p>
-      </div>
-      <div className="text-xs text-gray-400">{pet.lastActive}</div>
-    </div>
-  );
-};*/
 // Empty State Component
 const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
@@ -939,6 +897,7 @@ const ProfileContent: React.FC = () => {
   const [distance, setDistance] = useState(5);
   const [ageRange, setAgeRange] = useState([1, 10]);
   const [activeSettings, setActiveSettings] = useState('info'); // 'info', 'photos', 'preferences'
+  const router = useRouter();
 
   const user = {
     name: 'Charlie',
@@ -1196,21 +1155,50 @@ const ProfileContent: React.FC = () => {
         </ProfileSection>
       )}
 
-      <button className="mt-auto bg-gradient-to-r from-pink-500 to-red-500 text-white py-3 rounded-lg font-medium hover:from-pink-600 hover:to-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400">
-        Save Changes
-      </button>
+      <div className="mt-auto space-y-3">
+        <button className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white py-3 rounded-lg font-medium hover:from-pink-600 hover:to-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400">
+          Save Changes
+        </button>
+        <button 
+          onClick={() => router.push('/auth/login')}
+          className="w-full bg-gray-100 text-gray-600 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
 
 // Main App Component
-export default function PawfectMatch(): JSX.Element {
+export default function PetfectlyDashboard(): JSX.Element {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('discover');
   const [pets, setPets] = useState<Pet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+  // Handle incoming navigation with tab parameter from login page
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  // Optional: Update URL when tab changes locally
+  const handleTabChange = useCallback((newTab: string) => {
+    setActiveTab(newTab);
+    // Update URL without causing a page refresh
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.set('tab', newTab);
+    const search = current.toString();
+    const query = search ? `?${search}` : '';
+    router.push(`/${query}`, { scroll: false });
+  }, [router, searchParams]);
+
+  useEffect(() => {
     const loadPets = async () => {
       try {
         setIsLoading(true);
@@ -1234,7 +1222,8 @@ export default function PawfectMatch(): JSX.Element {
   const goToMessages = useCallback(() => {
    petSwiper.dismissMatch();
    setActiveTab('messages');
-  }, [petSwiper, setActiveTab]);
+  }, [petSwiper]);
+
   if (isLoading) {
     return (
       <div className="h-screen max-w-lg mx-auto flex items-center justify-center bg-gray-50">
@@ -1310,7 +1299,7 @@ export default function PawfectMatch(): JSX.Element {
         <nav className="border-t border-gray-200 bg-white">
           <div className="flex justify-around">
             <button
-              onClick={() => setActiveTab('discover')}
+              onClick={() => handleTabChange('discover')}
               className={`py-3 flex flex-col items-center flex-1 ${
                 activeTab === 'discover' ? 'text-pink-500' : 'text-gray-500'
               }`}
@@ -1320,7 +1309,7 @@ export default function PawfectMatch(): JSX.Element {
               <span className="text-xs mt-1">Discover</span>
             </button>
             <button
-              onClick={() => setActiveTab('messages')}
+              onClick={() => handleTabChange('messages')}
               className={`py-3 flex flex-col items-center flex-1 ${
                 activeTab === 'messages' ? 'text-pink-500' : 'text-gray-500'
               } relative`}
@@ -1335,7 +1324,7 @@ export default function PawfectMatch(): JSX.Element {
               )}
             </button>
             <button
-              onClick={() => setActiveTab('profile')}
+              onClick={() => handleTabChange('profile')}
               className={`py-3 flex flex-col items-center flex-1 ${
                 activeTab === 'profile' ? 'text-pink-500' : 'text-gray-500'
               }`}
