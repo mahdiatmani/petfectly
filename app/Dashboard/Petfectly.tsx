@@ -76,6 +76,15 @@ const animationStyles = `
     }
   }
 
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
   .animate-bounce-in {
     animation: bounce-in 0.5s;
   }
@@ -90,6 +99,10 @@ const animationStyles = `
 
   .animate-slide-left {
     animation: slide-left 0.5s;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
   }
 `;
 
@@ -595,7 +608,7 @@ const MatchPopup: React.FC<MatchPopupProps> = ({
   );
 };
 
-// Messages Item Component
+// Messages Item Component - Fixed for responsive mobile
 const MessageItem: React.FC<MessageItemProps> = ({
   pet,
   unread = false,
@@ -605,7 +618,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
   
   return (
     <div 
-      className={`relative flex items-center p-4 bg-white rounded-2xl mb-3 cursor-pointer transform transition-all duration-200 ${
+      className={`relative flex items-center p-3 bg-white rounded-2xl mb-3 cursor-pointer transform transition-all duration-200 ${
         isPressed ? 'scale-95' : 'scale-100'
       } hover:shadow-lg hover:scale-[1.02] active:scale-95`}
       onMouseDown={() => setIsPressed(true)}
@@ -620,11 +633,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
     >
       {/* Unread indicator bar */}
       {unread && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-pink-500 to-red-500 rounded-r-full"></div>
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-gradient-to-b from-pink-500 to-red-500 rounded-r-full"></div>
       )}
       
-      <div className="relative">
-        <div className="w-14 h-14 rounded-2xl overflow-hidden mr-3 ring-2 ring-gray-100">
+      {/* Avatar section - flex-shrink-0 prevents shrinking */}
+      <div className="relative flex-shrink-0 mr-3">
+        <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-gray-100">
           <img
             src={pet.images[0]}
             alt={pet.name}
@@ -632,21 +646,22 @@ const MessageItem: React.FC<MessageItemProps> = ({
           />
         </div>
         {unread && (
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-pink-500 to-red-500 rounded-full border-2 border-white animate-pulse"></div>
+          <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-gradient-to-br from-pink-500 to-red-500 rounded-full border-2 border-white animate-pulse"></div>
         )}
         {/* Online status indicator */}
         {pet.lastActive === '10 min ago' && (
-          <div className="absolute bottom-0 right-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+          <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
         )}
       </div>
       
-      <div className="flex-grow">
+      {/* Content section - flex-1 min-w-0 enables proper text truncation */}
+      <div className="flex-1 min-w-0 mr-2">
         <div className="flex items-center gap-2 mb-0.5">
-          <h3 className={`font-semibold ${unread ? 'text-gray-900' : 'text-gray-700'}`}>
+          <h3 className={`font-semibold truncate ${unread ? 'text-gray-900' : 'text-gray-700'}`}>
             {pet.name}
           </h3>
           {unread && (
-            <span className="text-xs bg-gradient-to-r from-pink-500 to-red-500 text-white px-2 py-0.5 rounded-full">
+            <span className="flex-shrink-0 text-xs bg-gradient-to-r from-pink-500 to-red-500 text-white px-2 py-0.5 rounded-full">
               New
             </span>
           )}
@@ -656,8 +671,9 @@ const MessageItem: React.FC<MessageItemProps> = ({
         </p>
       </div>
       
-      <div className="flex flex-col items-end gap-1">
-        <div className="text-xs text-gray-400">{pet.lastActive}</div>
+      {/* Time section - flex-shrink-0 and ml-auto keeps it aligned right */}
+      <div className="flex-shrink-0 flex flex-col items-end gap-1 ml-auto">
+        <div className="text-xs text-gray-400 whitespace-nowrap">{pet.lastActive}</div>
         {unread && (
           <div className="w-5 h-5 bg-gradient-to-br from-pink-500 to-red-500 rounded-full text-white text-[10px] font-semibold flex items-center justify-center">
             2
@@ -821,73 +837,184 @@ const DiscoverContent: React.FC<DiscoverContentProps> = ({ petSwiper }) => {
 const MessagesContent: React.FC<MessagesContentProps> = ({ matches }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'unread', 'online'
 
-  const filteredMatches = matches.filter((pet) =>
-    pet.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMatches = matches.filter((pet) => {
+    const matchesSearch = pet.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (activeFilter === 'unread') {
+      // Simulate some pets having unread messages
+      return matchesSearch && ([0, 2].includes(matches.indexOf(pet)));
+    }
+    if (activeFilter === 'online') {
+      return matchesSearch && pet.lastActive === '10 min ago';
+    }
+    return matchesSearch;
+  });
+
+  const getFilteredCount = (filter: string) => {
+    if (filter === 'unread') return 2;
+    if (filter === 'online') return matches.filter(m => m.lastActive === '10 min ago').length;
+    return matches.length;
+  };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Messages</h2>
-          <button
-            onClick={() => setShowSearch(!showSearch)}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Search messages"
-          >
-            <Search size={20} className="text-gray-500" />
-          </button>
-        </div>
-
-        {showSearch && (
-          <div className="relative mb-4">
-            <input
-              type="text"
-              placeholder="Search matches..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-3 pl-10 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400"
-            />
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
-            {searchTerm && (
+    <div className="h-full flex flex-col bg-gray-50">
+      <div className="bg-white rounded-b-3xl shadow-sm">
+        <div className="p-4 pb-2">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Messages</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {matches.length} matches waiting to chat
+              </p>
+            </div>
+            <div className="flex gap-2">
               <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                aria-label="Clear search"
+                onClick={() => setShowSearch(!showSearch)}
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                  showSearch 
+                    ? 'bg-gradient-to-r from-pink-500 to-red-500 text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                }`}
+                aria-label="Search messages"
               >
-                <X size={18} />
+                <Search size={18} />
               </button>
-            )}
+              <button
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-all text-gray-600"
+                aria-label="Filter messages"
+              >
+                <Filter size={18} />
+              </button>
+            </div>
           </div>
-        )}
 
-        {matches.length > 0 ? (
-          <div className="space-y-3">
-            {filteredMatches.map((pet, index) => (
-              <MessageItem
-                key={pet.id}
-                pet={pet}
-                unread={index === 0 || index === 2}
-                lastMessage={
-                  index === 0
-                    ? 'Hey there! Want to meet up at the dog park?'
-                    : 'Tap to start chatting'
-                }
+          {/* Animated search bar */}
+          <div className={`overflow-hidden transition-all duration-300 ${
+            showSearch ? 'max-h-20 opacity-100 mb-3' : 'max-h-0 opacity-0'
+          }`}>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search your matches..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-3 pl-10 pr-10 bg-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white transition-all"
               />
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Filter tabs */}
+          <div className="flex gap-2 pb-3">
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'unread', label: 'Unread' },
+              { id: 'online', label: 'Online' }
+            ].map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  activeFilter === filter.id
+                    ? 'bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {filter.label}
+                <span className="ml-1.5 text-xs opacity-80">
+                  ({getFilteredCount(filter.id)})
+                </span>
+              </button>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Messages list with improved spacing and animations */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        {matches.length > 0 ? (
+          <div className="space-y-0">
+            {filteredMatches.length > 0 ? (
+              filteredMatches.map((pet, index) => (
+                <div
+                  key={pet.id}
+                  className="animate-fade-in"
+                  style={{
+                    animationDelay: `${index * 50}ms`,
+                    animationFillMode: 'both',
+                  }}
+                >
+                  <MessageItem
+                    pet={pet}
+                    unread={index === 0 || index === 2}
+                    lastMessage={
+                      index === 0
+                        ? 'Hey there! Want to meet up at the dog park? 🐕'
+                        : index === 1
+                        ? 'That sounds like fun! My human is free tomorrow'
+                        : index === 2
+                        ? 'Just matched! Say hi 👋'
+                        : 'Tap to start chatting'
+                    }
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Search size={32} className="text-gray-300" />
+                </div>
+                <p className="text-gray-500 font-medium">No matches found</p>
+                <p className="text-gray-400 text-sm mt-1">Try a different search term</p>
+              </div>
+            )}
+          </div>
         ) : (
-          <EmptyState
-            icon={<Dog size={48} className="text-gray-300" />}
-            title="No matches yet"
-            description="Keep swiping to find perfect pet friends"
-          />
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="relative mb-6">
+              <div className="w-32 h-32 bg-gradient-to-br from-pink-100 to-red-100 rounded-full flex items-center justify-center">
+                <Dog size={48} className="text-pink-400" />
+              </div>
+              <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center">
+                <Heart size={20} className="text-pink-500" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">No matches yet</h3>
+            <p className="text-gray-500 text-center max-w-xs">
+              Keep swiping to find perfect pet friends. Your next match is just a swipe away!
+            </p>
+            <button 
+              onClick={() => setActiveFilter('all')}
+              className="mt-6 px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-full font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            >
+              Start Swiping
+            </button>
+          </div>
         )}
       </div>
+
+      {/* Floating compose button */}
+      {matches.length > 0 && (
+        <div className="absolute bottom-6 right-6">
+          <button className="w-14 h-14 bg-gradient-to-br from-pink-500 to-red-500 rounded-full shadow-lg text-white flex items-center justify-center transform hover:scale-110 transition-all hover:shadow-xl">
+            <MessageCircle size={24} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -1225,6 +1352,20 @@ export default function PetfectlyDashboard(): JSX.Element {
    setActiveTab('messages');
   }, [petSwiper]);
 
+  // Add smooth transitions between tabs
+  const getTabContent = () => {
+    switch (activeTab) {
+      case 'discover':
+        return <DiscoverContent petSwiper={petSwiper} />;
+      case 'messages':
+        return <MessagesContent matches={petSwiper.matches} />;
+      case 'profile':
+        return <ProfileContent />;
+      default:
+        return null;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-screen max-w-lg mx-auto flex items-center justify-center bg-gray-50">
@@ -1287,13 +1428,9 @@ export default function PetfectlyDashboard(): JSX.Element {
 
         {/* Main content area */}
         <main className="flex-grow overflow-hidden px-4 pb-4 pt-2">
-          {activeTab === 'discover' && (
-            <DiscoverContent petSwiper={petSwiper} />
-          )}
-          {activeTab === 'messages' && (
-            <MessagesContent matches={petSwiper.matches} />
-          )}
-          {activeTab === 'profile' && <ProfileContent />}
+          <div className="h-full animate-fade-in">
+            {getTabContent()}
+          </div>
         </main>
 
         {/* Bottom navigation */}
@@ -1319,7 +1456,7 @@ export default function PetfectlyDashboard(): JSX.Element {
               <MessageCircle size={24} />
               <span className="text-xs mt-1">Messages</span>
               {petSwiper.matches.length > 0 && (
-                <span className="absolute top-2.5 right-8 w-5 h-5 bg-pink-500 rounded-full text-white text-xs flex items-center justify-center">
+                <span className="absolute top-2 right-7 min-w-[20px] h-5 bg-gradient-to-br from-pink-500 to-red-500 rounded-full text-white text-xs font-semibold flex items-center justify-center px-1 shadow-md animate-bounce-in">
                   {petSwiper.matches.length}
                 </span>
               )}
