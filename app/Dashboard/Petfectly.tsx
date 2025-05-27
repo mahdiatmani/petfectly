@@ -193,87 +193,42 @@ interface MessagesContentProps {
 }
 
 // Sample pet data - extended with more details and realistic content
-const initialPets: Pet[] = [
-  {
-    id: 1,
-    name: 'Luna',
-    age: '2 years',
-    breed: 'Golden Retriever',
-    distance: '1.2 miles away',
-    bio: 'Friendly and playful, loves to fetch and swim! Looking for buddies to run around with at the park. Enjoys long walks and making new friends.',
-    interests: ['Fetch', 'Swimming', 'Hiking'],
-    personality: ['Friendly', 'Energetic', 'Social'],
-    images: [
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-    ],
-    liked: false,
-    lastActive: '10 min ago',
-  },
-  {
-    id: 2,
-    name: 'Max',
-    age: '3 years',
-    breed: 'French Bulldog',
-    distance: '0.8 miles away',
-    bio: 'Couch potato who occasionally likes short walks. Seeking a nap buddy who enjoys snacks. Very affectionate and loves belly rubs!',
-    interests: ['Napping', 'Treats', 'Short walks'],
-    personality: ['Laid-back', 'Affectionate', 'Foodie'],
-    images: [
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-    ],
-    liked: false,
-    lastActive: '2 hours ago',
-  },
-  {
-    id: 3,
-    name: 'Bella',
-    age: '1 year',
-    breed: 'Siamese Cat',
-    distance: '2.4 miles away',
-    bio: 'Independent but affectionate. Loves chasing toys and sunbathing. Looking for a calm companion who respects personal space.',
-    interests: ['Bird watching', 'Sunbathing', 'Toys'],
-    personality: ['Independent', 'Curious', 'Playful'],
-    images: [
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-    ],
-    liked: false,
-    lastActive: '5 min ago',
-  },
-  {
-    id: 4,
-    name: 'Rocky',
-    age: '4 years',
-    breed: 'German Shepherd',
-    distance: '3.5 miles away',
-    bio: 'Intelligent and protective. Enjoys hiking and training sessions. Seeking an active playmate for adventures and learning new tricks.',
-    interests: ['Training', 'Hiking', 'Puzzle toys'],
-    personality: ['Intelligent', 'Loyal', 'Athletic'],
-    images: [
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-      'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg',
-    ],
-    liked: false,
-    lastActive: '1 day ago',
-  },
-  {
-    id: 5,
-    name: 'Coco',
-    age: '2 years',
-    breed: 'Maine Coon',
-    distance: '1.5 miles away',
-    bio: 'Gentle giant with a luxurious coat. Enjoys climbing and watching birds from windows. Looking for a calm friend for occasional play.',
-    interests: ['Climbing', 'Birdwatching', 'Grooming'],
-    personality: ['Gentle', 'Majestic', 'Observant'],
-    images: ['/api/placeholder/800/600', '/api/placeholder/800/600'],
-    liked: false,
-    lastActive: '3 hours ago',
-  },
-];
+
+const API_BASE_URL = 'http://localhost:5000';
+
+const fetchPets = async (): Promise<Pet[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/pets`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching pets:', error);
+    throw error;
+  }
+};
+
+const updatePetLike = async (petId: number, liked: boolean): Promise<void> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/pets/${petId}/like`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ liked }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error updating pet like:', error);
+    throw error;
+  }
+};
+
+
 
 // Custom hook for swipe gestures
 const useSwipeGesture = (
@@ -317,6 +272,10 @@ const useSwipeGesture = (
 const usePetSwiper = (initialData: Pet[]): PetSwiperHook => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pets, setPets] = useState(initialData);
+    useEffect(() => {
+      setPets(initialData);
+      setCurrentIndex(0);     // optional: reset to first pet
+    }, [initialData]);
   const [imageIndex, setImageIndex] = useState(0);
   const [matches, setMatches] = useState<Pet[]>([]);
   const [showMatch, setShowMatch] = useState(false);
@@ -326,13 +285,17 @@ const usePetSwiper = (initialData: Pet[]): PetSwiperHook => {
 
   const currentPet = useMemo(() => pets[currentIndex], [pets, currentIndex]);
 
-  const handleLike = useCallback(() => {
-    if (isAnimating) return;
+  const handleLike = useCallback(async () => {
+    if (isAnimating || !currentPet) return;
 
     setSwipeDirection('right');
     setIsAnimating(true);
 
-    setTimeout(() => {
+    try {
+      // Update database
+      await updatePetLike(currentPet.id, true);
+      
+      // Update local state
       const newPets = [...pets];
       newPets[currentIndex].liked = true;
       setPets(newPets);
@@ -345,8 +308,12 @@ const usePetSwiper = (initialData: Pet[]): PetSwiperHook => {
       }
 
       nextPet();
+    } catch (error) {
+      console.error('Failed to like pet:', error);
+      // Handle error (show toast, etc.)
+    } finally {
       setIsAnimating(false);
-    }, 300);
+    }
   }, [currentIndex, currentPet, isAnimating, pets]);
 
   const handleDislike = useCallback(() => {
@@ -1239,14 +1206,62 @@ const ProfileContent: React.FC = () => {
 // Main App Component
 export default function PawfectMatch(): JSX.Element {
   const [activeTab, setActiveTab] = useState('discover');
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+    const loadPets = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedPets = await fetchPets();
+        setPets(fetchedPets);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load pets. Please try again.');
+        console.error('Error loading pets:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPets();
+  }, []);
 
   // Use custom hook for pet swiping functionality
-  const petSwiper = usePetSwiper(initialPets);
-
+  const petSwiper = usePetSwiper(pets);
+  // ▶︎ move this up so it always runs, even when loading/error
   const goToMessages = useCallback(() => {
-    petSwiper.dismissMatch();
-    setActiveTab('messages');
+   petSwiper.dismissMatch();
+   setActiveTab('messages');
   }, [petSwiper, setActiveTab]);
+  if (isLoading) {
+    return (
+      <div className="h-screen max-w-lg mx-auto flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Dog className="animate-bounce text-pink-500 mx-auto mb-4" size={48} />
+          <p className="text-gray-600">Loading adorable pets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="h-screen max-w-lg mx-auto flex items-center justify-center bg-gray-50">
+        <div className="text-center p-4">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-pink-500 text-white px-4 py-2 rounded-lg"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -10,129 +10,96 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// ── MIDDLEWARE ────────────────────────────────────────────────────────────────
+// Allow Next.js client
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Create uploads directory if it doesn't exist
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
-}
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// Configure multer for file uploads
+// Multer config
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
-    }
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed!'), false);
   }
 });
 
-// Connect to MongoDB
+// ── MONGOOSE CONNECTION ───────────────────────────────────────────────────────
 mongoose.connect('mongodb://localhost:27017/petfectly', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// User Schema
+// ── SCHEMAS & MODELS ──────────────────────────────────────────────────────────
+// User schema
 const userSchema = new mongoose.Schema({
-  fullName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6
-  },
+  fullName: { type: String, required: true, trim: true },
+  email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true, minlength: 6 },
   petInfo: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    breed: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    age: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    photo: {
-      type: String, // File path
-      default: null
-    }
+    name:   { type: String, required: true },
+    breed:  { type: String, required: true },
+    age:    { type: String, required: true },
+    photo:  { type: String, default: null }
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  createdAt: { type: Date, default: Date.now }
 });
-
-// Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
-
 const User = mongoose.model('User', userSchema);
 
+// Pet schema (must be defined _before_ we use it in routes)
+const petSchema = new mongoose.Schema({
+  name:        String,
+  age:         String,
+  breed:       String,
+  distance:    String,
+  bio:         String,
+  interests:   [String],
+  personality: [String],
+  images:      [String],
+  liked:       { type: Boolean, default: false },
+  lastActive:  String
+});
+const Pet = mongoose.model('Pet', petSchema);
+
+// ── ROUTES ────────────────────────────────────────────────────────────────────
 // Registration endpoint
 app.post('/api/register', upload.single('petPhoto'), async (req, res) => {
   try {
     const { fullName, email, password, petName, petBreed, petAge } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'User with this email already exists' 
-      });
+    // Check if user exists
+    if (await User.findOne({ email })) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    // Create new user
+    // Create & save user
     const userData = {
-      fullName,
-      email,
-      password,
+      fullName, email, password,
       petInfo: {
         name: petName,
         breed: petBreed,
@@ -140,152 +107,95 @@ app.post('/api/register', upload.single('petPhoto'), async (req, res) => {
         photo: req.file ? req.file.filename : null
       }
     };
-
     const user = new User(userData);
     await user.save();
 
-    // Remove password from response
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      user: userResponse
+    // ── OPTIONAL: seed a Pet document so /api/pets returns something ──
+    const petDoc = new Pet({
+      name:       petName,
+      breed:      petBreed,
+      age:        petAge,
+      images:     req.file ? [`/uploads/${req.file.filename}`] : [],
+      liked:      false,
+      lastActive: new Date().toISOString()
     });
+    await petDoc.save();
+
+    // Respond (omitting password)
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.status(201).json({ success: true, user: userObj, pet: petDoc });
 
   } catch (error) {
     console.error('Registration error:', error);
-    
-    // Delete uploaded file if user creation fails
-    if (req.file) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
-    }
-
-    if (error.code === 11000) {
-      res.status(400).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    } else if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Server error during registration'
-      });
-    }
+    if (req.file) fs.unlinkSync(req.file.path);
+    const status = error.code === 11000 ? 400 : 500;
+    res.status(status).json({ success: false, message: error.message });
   }
 });
 
-// Login endpoint (bonus)
+// Login endpoint
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Find user by email
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
-
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Remove password from response
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      user: userResponse
-    });
-
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during login'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Get all users (for testing)
+// (Optional) list all users
 app.get('/api/users', async (req, res) => {
   try {
     const users = await User.find({}).select('-password');
-    res.json({
-      success: true,
-      users
-    });
+    res.json({ success: true, users });
   } catch (error) {
     console.error('Get users error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Error handling middleware
-app.use((error, req, res, next) => {
-  if (error instanceof multer.MulterError) {
-    if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({
-        success: false,
-        message: 'File too large. Maximum size is 5MB.'
-      });
-    }
-  }
-  
-  res.status(500).json({
-    success: false,
-    message: error.message || 'Something went wrong!'
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-// GET /api/pets — return every user’s petInfo as a pet list
+// Fetch all *unliked* pets
 app.get('/api/pets', async (req, res) => {
   try {
-    // fetch all users (we assume each has one petInfo)
-    const users = await User.find({}).select('petInfo fullName');
-
-    // map to a pets array
-    const pets = users.map(u => ({
-      id: u._id.toString(),
-      name: u.petInfo.name,
-      breed: u.petInfo.breed,
-      age: u.petInfo.age,
-      photoUrl: u.petInfo.photo
-        ? `${req.protocol}://${req.get('host')}/uploads/${u.petInfo.photo}`
-        : null,
-      ownerName: u.fullName
-    }));
-
-    res.json({ success: true, pets });
-  } catch (err) {
-    console.error('Error fetching pets:', err);
-    res.status(500).json({ success: false, message: 'Could not fetch pets' });
+    const pets = await Pet.find({ liked: false });
+    res.json(pets);
+  } catch (error) {
+    console.error('Get pets error:', error);
+    res.status(500).json({ error: 'Failed to fetch pets' });
   }
+});
+
+// Like/unlike a pet
+app.patch('/api/pets/:id/like', async (req, res) => {
+  try {
+    const pet = await Pet.findOneAndUpdate(
+      { id: Number(req.params.id) },
+      { liked: req.body.liked },
+      { new: true }
+    );
+    if (!pet) return res.status(404).json({ error: 'Pet not found' });
+    res.json(pet);
+  } catch (error) {
+    console.error('Patch pet error:', error);
+    res.status(500).json({ error: 'Failed to update pet' });
+  }
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ success: false, message: err.message || 'Something went wrong' });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

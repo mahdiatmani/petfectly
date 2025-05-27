@@ -1,0 +1,198 @@
+[
+  {
+    "id": 1,
+    "name": "Luna",
+    "age": "2 years",
+    "breed": "Golden Retriever",
+    "distance": "1.2 miles away",
+    "bio": "Friendly and playful, loves to fetch and swim! Looking for buddies to run around with at the park. Enjoys long walks and making new friends.",
+    "interests": ["Fetch", "Swimming", "Hiking"],
+    "personality": ["Friendly", "Energetic", "Social"],
+    "images": [
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "10 min ago"
+  },
+  {
+    "id": 2,
+    "name": "Max",
+    "age": "3 years",
+    "breed": "French Bulldog",
+    "distance": "0.8 miles away",
+    "bio": "Couch potato who occasionally likes short walks. Seeking a nap buddy who enjoys snacks. Very affectionate and loves belly рubs!",
+    "interests": ["Napping", "Treats", "Short walks"],
+    "personality": ["Laid-back", "Affectionate", "Foodie"],
+    "images": [
+      "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "2 hours ago"
+  },
+  {
+    "id": 3,
+    "name": "Bella",
+    "age": "1 year",
+    "breed": "Siamese Cat",
+    "distance": "2.4 miles away",
+    "bio": "Independent but affectionate. Loves chasing toys and sunbathing. Looking for a calm companion who respects personal space.",
+    "interests": ["Bird watching", "Sunbathing", "Toys"],
+    "personality": ["Independent", "Curious", "Playful"],
+    "images": [
+      "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "5 min ago"
+  },
+  {
+    "id": 4,
+    "name": "Rocky",
+    "age": "4 years",
+    "breed": "German Shepherd",
+    "distance": "3.5 miles away",
+    "bio": "Intelligent and protective. Enjoys hiking and training sessions. Seeking an active playmate for adventures and learning new tricks.",
+    "interests": ["Training", "Hiking", "Puzzle toys"],
+    "personality": ["Intelligent", "Loyal", "Athletic"],
+    "images": [
+      "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1551717743-49959800b1f6?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "1 day ago"
+  },
+  {
+    "id": 5,
+    "name": "Coco",
+    "age": "2 years",
+    "breed": "Maine Coon",
+    "distance": "1.5 miles away",
+    "bio": "Gentle giant with a luxurious coat. Enjoys climbing and watching birds from windows. Looking for a calm friend for occasional play.",
+    "interests": ["Climbing", "Birdwatching", "Grooming"],
+    "personality": ["Gentle", "Majestic", "Observant"],
+    "images": [
+      "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "3 hours ago"
+  },
+  {
+    "id": 6,
+    "name": "Charlie",
+    "age": "5 years",
+    "breed": "Beagle",
+    "distance": "2.1 miles away",
+    "bio": "Curious explorer with an amazing nose! Loves sniffing around and going on adventures. Great with kids and other pets.",
+    "interests": ["Exploring", "Sniffing", "Playing with kids"],
+    "personality": ["Curious", "Friendly", "Patient"],
+    "images": [
+      "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "30 min ago"
+  },
+  {
+    "id": 7,
+    "name": "Daisy",
+    "age": "3 years",
+    "breed": "Border Collie",
+    "distance": "4.2 miles away",
+    "bio": "Super smart and energetic! Loves learning new tricks and playing frisbee. Looking for an active companion who can keep up with my energy.",
+    "interests": ["Frisbee", "Agility", "Learning tricks"],
+    "personality": ["Smart", "Energetic", "Focused"],
+    "images": [
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "15 min ago"
+  },
+  {
+    "id": 8,
+    "name": "Milo",
+    "age": "1 year",
+    "breed": "Tabby Cat",
+    "distance": "1.8 miles away",
+    "bio": "Playful kitten who loves to chase laser pointers and climb cat trees. Very social and loves meeting new friends!",
+    "interests": ["Laser pointers", "Climbing", "Catnip"],
+    "personality": ["Playful", "Social", "Mischievous"],
+    "images": [
+      "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "45 min ago"
+  },
+  {
+    "id": 9,
+    "name": "Ruby",
+    "age": "4 years",
+    "breed": "Cavalier King Charles Spaniel",
+    "distance": "0.5 miles away",
+    "bio": "Sweet and gentle soul who loves cuddles and gentle walks. Perfect companion for quiet afternoons and cozy evenings.",
+    "interests": ["Cuddles", "Gentle walks", "Lap sitting"],
+    "personality": ["Sweet", "Gentle", "Affectionate"],
+    "images": [
+      "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "1 hour ago"
+  },
+  {
+    "id": 10,
+    "name": "Oscar",
+    "age": "6 years",
+    "breed": "Persian Cat",
+    "distance": "3.7 miles away",
+    "bio": "Dignified and calm. Enjoys quiet moments, gentle brushing, and watching the world from sunny windows. Seeks a peaceful companion.",
+    "interests": ["Sunbathing", "Grooming", "Quiet time"],
+    "personality": ["Calm", "Dignified", "Peaceful"],
+    "images": [
+      "https://images.unsplash.com/photo-1571566882372-1598d88abd90?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "4 hours ago"
+  },
+  {
+    "id": 11,
+    "name": "Zoe",
+    "age": "2 years",
+    "breed": "Husky",
+    "distance": "5.2 miles away",
+    "bio": "Adventure seeker who loves snow, running, and outdoor activities. Looking for an active partner for hiking and winter sports!",
+    "interests": ["Running", "Snow", "Hiking"],
+    "personality": ["Adventurous", "Energetic", "Independent"],
+    "images": [
+      "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1551717743-49959800b1f6?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "20 min ago"
+  },
+  {
+    "id": 12,
+    "name": "Finn",
+    "age": "3 years",
+    "breed": "Mixed Breed",
+    "distance": "2.8 miles away",
+    "bio": "Unique mix with the best of all breeds! Loves making friends, playing games, and discovering new places. Every day is an adventure!",
+    "interests": ["Making friends", "Games", "Exploring"],
+    "personality": ["Unique", "Adaptable", "Fun-loving"],
+    "images": [
+      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&h=600&fit=crop"
+    ],
+    "liked": false,
+    "lastActive": "35 min ago"
+  }
+]
