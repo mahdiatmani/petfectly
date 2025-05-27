@@ -167,7 +167,9 @@ const RegisterPage = () => {
             
             <div className="space-y-4">
               <button 
-                onClick={() => console.log('Navigate to dashboard')}
+                //onClick={() => console.log('Navigate to dashboard')}
+                 onClick={() => window.location.href = '/Tuto'}
+                
                 className="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white rounded-xl font-medium hover:from-pink-600 hover:to-red-600 transition-colors"
               >
                 Get Started
