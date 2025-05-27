@@ -114,9 +114,9 @@ const RegisterPage = () => {
         
         // Optionally redirect after a delay
         setTimeout(() => {
-          window.location.href = '/auth/login'; // Uncomment if you have a login page
+          window.location.href = '/Tuto'; // Uncomment if you have a login page
           console.log('Would redirect to login page');
-        }, 2000);
+        }, 5000);
       } else {
         setServerMessage(data.message || 'Registration failed');
         if (data.errors) {

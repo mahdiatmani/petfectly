@@ -22,7 +22,6 @@ import {
   Calendar,
   Filter,
 } from 'lucide-react';
-
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 
@@ -1025,21 +1024,31 @@ const ProfileContent: React.FC = () => {
   const [ageRange, setAgeRange] = useState([1, 10]);
   const [activeSettings, setActiveSettings] = useState('info'); // 'info', 'photos', 'preferences'
   const router = useRouter();
-
-  const storedUser = JSON.parse(sessionStorage.getItem('user') || '{}');
-  const storedPet  = JSON.parse(sessionStorage.getItem('pet')  || '{}');
-  const user = {
-
-   name:        storedPet.name        || 'Unknown',
-    bio:         storedPet.bio         || '',            // if you later add a bio field
-    age:         storedPet.age         || '',
-    breed:       storedPet.breed       || '',
-    photos:      (storedPet.images || []).map((img: string) =>
-                    `http://localhost:5000${img}`
-                 ),
-    interests:   storedPet.interests   || [],
-    personality: storedPet.personality || [],
+  const [storedUser, setStoredUser] = useState<Record<string, any>>({});
+   useEffect(() => {
+     if (typeof window !== 'undefined') {
+       const u = sessionStorage.getItem('user');
+       setStoredUser(u && u !== 'undefined' ? JSON.parse(u) : {});
+     }
+   }, []);
+  // ← Add this inside ProfileContent, before you use `handleLogout` in JSX
+  const handleLogout = () => {
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('pet');
+    router.push('/auth/login');
   };
+ const pet = storedUser.petInfo || {};
+ const user = {
+   name:        pet.name  || 'Unknown',
+   bio:         pet.bio   || '',
+   age:         pet.age   || '',
+   breed:       pet.breed || '',
+   photos:      pet.photo
+                  ? [`http://localhost:5000/uploads/${pet.photo}`]
+                  : [],
+   interests:   pet.interests   || [],
+   personality: pet.personality || [],
+ };
 
   return (
     <div className="h-full flex flex-col p-4">
@@ -1288,7 +1297,7 @@ const ProfileContent: React.FC = () => {
           Save Changes
         </button>
         <button 
-          onClick={() => router.push('/auth/login')}
+          onClick={handleLogout}
           className="w-full bg-gray-100 text-gray-600 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
         >
           Logout
