@@ -13,8 +13,10 @@ import {
   Camera,
   CheckCircle,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const RegisterPage = () => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -68,13 +70,15 @@ const RegisterPage = () => {
 
   const handleNextStep = () => {
     if (step === 1 && validateStep1()) {
+      // move to pet-info step
       setStep(2);
+      return;
     } else if (step === 2 && validateStep2()) {
-      
-      handleSubmit();
-    }
-  };
-
+      // once pet info (name, breed, age, photo) is valid, navigate to /pet
+      router.push('/pet');
+      return;
+     }
+   };
   const handleBack = () => {
     setStep(1);
   };
@@ -534,7 +538,7 @@ const RegisterPage = () => {
                 </>
               ) : (
                 <>
-                  Register <UserPlus size={18} className="ml-2" />
+                  Continue <UserPlus size={18} className="ml-2" />
                 </>
               )}
             </button>
