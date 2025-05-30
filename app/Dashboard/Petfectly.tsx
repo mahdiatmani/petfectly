@@ -1020,7 +1020,6 @@ const MessagesContent: React.FC<MessagesContentProps> = ({ matches }) => {
   );
 };
 
-// Profile Tab Component
 const ProfileContent: React.FC = () => {
   const [distance, setDistance] = useState(5);
   const [ageRange, setAgeRange] = useState([1, 10]);
@@ -1053,262 +1052,270 @@ const ProfileContent: React.FC = () => {
  };
 
   return (
-    <div className="h-full flex flex-col p-4">
-      <div className="mb-6 flex flex-col items-center">
-        <ProfilePhoto url={user.photos[0] || ''} editable size="large" />
-        <h2 className="text-xl font-bold mt-3">{user.name}</h2>
-        <div className="inline-flex items-center bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600 mt-1">
-          <Dog size={14} className="mr-1" />
-          {user.breed}
+    <div className="h-full flex flex-col" style={{WebkitOverflowScrolling: 'touch'}}>
+      {/* Fixed Header Section */}
+      <div className="flex-shrink-0 p-4 pb-0">
+        <div className="mb-6 flex flex-col items-center">
+          <ProfilePhoto url={user.photos[0] || ''} editable size="large" />
+          <h2 className="text-xl font-bold mt-3">{user.name}</h2>
+          <div className="inline-flex items-center bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600 mt-1">
+            <Dog size={14} className="mr-1" />
+            {user.breed}
+          </div>
+        </div>
+
+        {/* Navigation tabs for profile sections */}
+        <div className="flex border-b border-gray-200 mb-4">
+          <button
+            className={`flex-1 py-2 text-center font-medium ${
+              activeSettings === 'info'
+                ? 'text-pink-500 border-b-2 border-pink-500'
+                : 'text-gray-500'
+            }`}
+            onClick={() => setActiveSettings('info')}
+          >
+            Info
+          </button>
+          <button
+            className={`flex-1 py-2 text-center font-medium ${
+              activeSettings === 'photos'
+                ? 'text-pink-500 border-b-2 border-pink-500'
+                : 'text-gray-500'
+            }`}
+            onClick={() => setActiveSettings('photos')}
+          >
+            Photos
+          </button>
+          <button
+            className={`flex-1 py-2 text-center font-medium ${
+              activeSettings === 'preferences'
+                ? 'text-pink-500 border-b-2 border-pink-500'
+                : 'text-gray-500'
+            }`}
+            onClick={() => setActiveSettings('preferences')}
+          >
+            Preferences
+          </button>
         </div>
       </div>
 
-      {/* Navigation tabs for profile sections */}
-      <div className="flex border-b border-gray-200 mb-4">
-        <button
-          className={`flex-1 py-2 text-center font-medium ${
-            activeSettings === 'info'
-              ? 'text-pink-500 border-b-2 border-pink-500'
-              : 'text-gray-500'
-          }`}
-          onClick={() => setActiveSettings('info')}
-        >
-          Info
-        </button>
-        <button
-          className={`flex-1 py-2 text-center font-medium ${
-            activeSettings === 'photos'
-              ? 'text-pink-500 border-b-2 border-pink-500'
-              : 'text-gray-500'
-          }`}
-          onClick={() => setActiveSettings('photos')}
-        >
-          Photos
-        </button>
-        <button
-          className={`flex-1 py-2 text-center font-medium ${
-            activeSettings === 'preferences'
-              ? 'text-pink-500 border-b-2 border-pink-500'
-              : 'text-gray-500'
-          }`}
-          onClick={() => setActiveSettings('preferences')}
-        >
-          Preferences
-        </button>
-      </div>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+        <div className="pb-4 space-y-4">
+          {activeSettings === 'info' && (
+            <>
+              <ProfileSection title="About" editable={true}>
+                <p className="text-gray-700 text-sm">{user.bio}</p>
 
-      {activeSettings === 'info' && (
-        <>
-          <ProfileSection title="About" editable={true}>
-            <p className="text-gray-700 text-sm">{user.bio}</p>
-
-            <div className="mt-4">
-              <h4 className="text-xs uppercase text-gray-400 mb-2">
-                Interests
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {user.interests.map((interest, idx) => (
-                  <span
-                    key={idx}
-                    className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-700"
-                  >
-                    {interest}
-                  </span>
-                ))}
-                <button className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-400 border border-dashed border-gray-300">
-                  + Add
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <h4 className="text-xs uppercase text-gray-400 mb-2">
-                Personality
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {user.personality.map((trait, idx) => (
-                  <span
-                    key={idx}
-                    className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-700"
-                  >
-                    {trait}
-                  </span>
-                ))}
-                <button className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-400 border border-dashed border-gray-300">
-                  + Add
-                </button>
-              </div>
-            </div>
-          </ProfileSection>
-
-          <ProfileSection title="Basic Info" editable={true}>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Calendar size={18} className="text-gray-400 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-500">Age</p>
-                  <p className="font-medium">{user.age}</p>
+                <div className="mt-4">
+                  <h4 className="text-xs uppercase text-gray-400 mb-2">
+                    Interests
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {user.interests.map((interest, idx) => (
+                      <span
+                        key={idx}
+                        className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-700"
+                      >
+                        {interest}
+                      </span>
+                    ))}
+                    <button className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-400 border border-dashed border-gray-300">
+                      + Add
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center">
-                <Dog size={18} className="text-gray-400 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-500">Breed</p>
-                  <p className="font-medium">{user.breed}</p>
+
+                <div className="mt-4">
+                  <h4 className="text-xs uppercase text-gray-400 mb-2">
+                    Personality
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {user.personality.map((trait, idx) => (
+                      <span
+                        key={idx}
+                        className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-700"
+                      >
+                        {trait}
+                      </span>
+                    ))}
+                    <button className="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-400 border border-dashed border-gray-300">
+                      + Add
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </ProfileSection>
-        </>
-      )}
+              </ProfileSection>
 
-      {activeSettings === 'photos' && (
-        <ProfileSection title="Photos">
-          <div className="grid grid-cols-3 gap-2">
-            {user.photos.map((photo, idx) => (
-              <div
-                key={idx}
-                className="aspect-square bg-gray-100 rounded-md overflow-hidden relative group"
-              >
-                <img
-                  src={photo}
-                  alt={`Pet photo ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <button className="bg-white p-2 rounded-full">
-                    <Edit size={16} className="text-gray-700" />
-                  </button>
+              <ProfileSection title="Basic Info" editable={true}>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <Calendar size={18} className="text-gray-400 mr-3" />
+                    <div>
+                      <p className="text-sm text-gray-500">Age</p>
+                      <p className="font-medium">{user.age}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <Dog size={18} className="text-gray-400 mr-3" />
+                    <div>
+                      <p className="text-sm text-gray-500">Breed</p>
+                      <p className="font-medium">{user.breed}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-            <div className="aspect-square bg-gray-100 rounded-md flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors">
-              <div className="flex flex-col items-center text-gray-400">
-                <Camera size={24} />
-                <span className="text-xs mt-1">Add Photo</span>
-              </div>
-            </div>
-          </div>
-        </ProfileSection>
-      )}
+              </ProfileSection>
+            </>
+          )}
 
-      {activeSettings === 'preferences' && (
-        <ProfileSection title="Match Preferences">
-          <div className="space-y-4">
-            <PreferenceSlider
-              label="Maximum Distance"
-              value={`${distance} miles`}
-              min={1}
-              max={50}
-              onChange={(e) => setDistance(parseInt(e.target.value))}
-            />
-
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-sm font-medium text-gray-700">
-                  Age Range
-                </label>
-                <span className="text-sm text-gray-500">
-                  {ageRange[0]}-{ageRange[1]} years
-                </span>
-              </div>
-              <div className="relative pt-5">
-                <div className="h-2 bg-gray-200 rounded-lg">
+          {activeSettings === 'photos' && (
+            <ProfileSection title="Photos">
+              <div className="grid grid-cols-3 gap-2">
+                {user.photos.map((photo, idx) => (
                   <div
-                    className="absolute h-2 bg-pink-500 rounded-lg"
-                    style={{
-                      left: `${(ageRange[0] - 1) * 10}%`,
-                      width: `${(ageRange[1] - ageRange[0]) * 10}%`,
-                    }}
-                  ></div>
+                    key={idx}
+                    className="aspect-square bg-gray-100 rounded-md overflow-hidden relative group"
+                  >
+                    <img
+                      src={photo}
+                      alt={`Pet photo ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <button className="bg-white p-2 rounded-full">
+                        <Edit size={16} className="text-gray-700" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div className="aspect-square bg-gray-100 rounded-md flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col items-center text-gray-400">
+                    <Camera size={24} />
+                    <span className="text-xs mt-1">Add Photo</span>
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={10}
-                  value={ageRange[0]}
-                  onChange={(e) =>
-                    setAgeRange([parseInt(e.target.value), ageRange[1]])
-                  }
-                  className="absolute top-0 left-0 w-full h-2 appearance-none bg-transparent pointer-events-none"
-                />
-                <input
-                  type="range"
-                  min={1}
-                  max={10}
-                  value={ageRange[1]}
-                  onChange={(e) =>
-                    setAgeRange([ageRange[0], parseInt(e.target.value)])
-                  }
-                  className="absolute top-0 left-0 w-full h-2 appearance-none bg-transparent pointer-events-none"
-                />
               </div>
-            </div>
+            </ProfileSection>
+          )}
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-2">
-                Species
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center p-3 bg-gray-100 rounded-lg cursor-pointer">
-                  <input
-                    type="checkbox"
-                    id="dogs"
-                    defaultChecked
-                    className="mr-2 accent-pink-500"
-                  />
-                  <label
-                    htmlFor="dogs"
-                    className="flex items-center cursor-pointer"
-                  >
-                    <Dog size={16} className="mr-2" />
-                    Dogs
-                  </label>
+          {activeSettings === 'preferences' && (
+            <ProfileSection title="Match Preferences">
+              <div className="space-y-4">
+                <PreferenceSlider
+                  label="Maximum Distance"
+                  value={`${distance} miles`}
+                  min={1}
+                  max={50}
+                  onChange={(e) => setDistance(parseInt(e.target.value))}
+                />
+
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Age Range
+                    </label>
+                    <span className="text-sm text-gray-500">
+                      {ageRange[0]}-{ageRange[1]} years
+                    </span>
+                  </div>
+                  <div className="relative pt-5">
+                    <div className="h-2 bg-gray-200 rounded-lg">
+                      <div
+                        className="absolute h-2 bg-pink-500 rounded-lg"
+                        style={{
+                          left: `${(ageRange[0] - 1) * 10}%`,
+                          width: `${(ageRange[1] - ageRange[0]) * 10}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      value={ageRange[0]}
+                      onChange={(e) =>
+                        setAgeRange([parseInt(e.target.value), ageRange[1]])
+                      }
+                      className="absolute top-0 left-0 w-full h-2 appearance-none bg-transparent pointer-events-none"
+                    />
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      value={ageRange[1]}
+                      onChange={(e) =>
+                        setAgeRange([ageRange[0], parseInt(e.target.value)])
+                      }
+                      className="absolute top-0 left-0 w-full h-2 appearance-none bg-transparent pointer-events-none"
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center p-3 bg-gray-100 rounded-lg cursor-pointer">
-                  <input
-                    type="checkbox"
-                    id="cats"
-                    defaultChecked
-                    className="mr-2 accent-pink-500"
-                  />
-                  <label
-                    htmlFor="cats"
-                    className="flex items-center cursor-pointer"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M12,22 C17.5228475,22 22,17.5228475 22,12 C22,6.4771525 17.5228475,2 12,2 C6.4771525,2 2,6.4771525 2,12 C2,17.5228475 6.4771525,22 12,22 Z M12,15 C10.8954305,15 10,14.1045695 10,13 C10,11.8954305 10.8954305,11 12,11 C13.1045695,11 14,11.8954305 14,13 C14,14.1045695 13.1045695,15 12,15 Z M7.5,9 C7.5,8.17157288 8.17157288,7.5 9,7.5 C9.82842712,7.5 10.5,8.17157288 10.5,9 C10.5,9.82842712 9.82842712,10.5 9,10.5 C8.17157288,10.5 7.5,9.82842712 7.5,9 Z M13.5,9 C13.5,8.17157288 14.1715729,7.5 15,7.5 C15.8284271,7.5 16.5,8.17157288 16.5,9 C16.5,9.82842712 15.8284271,10.5 15,10.5 C14.1715729,10.5 13.5,9.82842712 13.5,9 Z" />
-                    </svg>
-                    Cats
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">
+                    Species
                   </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-center p-3 bg-gray-100 rounded-lg cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="dogs"
+                        defaultChecked
+                        className="mr-2 accent-pink-500"
+                      />
+                      <label
+                        htmlFor="dogs"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <Dog size={16} className="mr-2" />
+                        Dogs
+                      </label>
+                    </div>
+                    <div className="flex items-center p-3 bg-gray-100 rounded-lg cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="cats"
+                        defaultChecked
+                        className="mr-2 accent-pink-500"
+                      />
+                      <label
+                        htmlFor="cats"
+                        className="flex items-center cursor-pointer"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-2"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M12,22 C17.5228475,22 22,17.5228475 22,12 C22,6.4771525 17.5228475,2 12,2 C6.4771525,2 2,6.4771525 2,12 C2,17.5228475 6.4771525,22 12,22 Z M12,15 C10.8954305,15 10,14.1045695 10,13 C10,11.8954305 10.8954305,11 12,11 C13.1045695,11 14,11.8954305 14,13 C14,14.1045695 13.1045695,15 12,15 Z M7.5,9 C7.5,8.17157288 8.17157288,7.5 9,7.5 C9.82842712,7.5 10.5,8.17157288 10.5,9 C10.5,9.82842712 9.82842712,10.5 9,10.5 C8.17157288,10.5 7.5,9.82842712 7.5,9 Z M13.5,9 C13.5,8.17157288 14.1715729,7.5 15,7.5 C15.8284271,7.5 16.5,8.17157288 16.5,9 C16.5,9.82842712 15.8284271,10.5 15,10.5 C14.1715729,10.5 13.5,9.82842712 13.5,9 Z" />
+                        </svg>
+                        Cats
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </ProfileSection>
+          )}
+
+          {/* Save and Logout Buttons - Now inside scrollable area */}
+          <div className="mt-6 space-y-3">
+            <button className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white py-3 rounded-lg font-medium hover:from-pink-600 hover:to-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400">
+              Save Changes
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="w-full bg-gray-100 text-gray-600 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+            >
+              Logout
+            </button>
           </div>
-        </ProfileSection>
-      )}
-
-      <div className="mt-auto space-y-3">
-        <button className="w-full bg-gradient-to-r from-pink-500 to-red-500 text-white py-3 rounded-lg font-medium hover:from-pink-600 hover:to-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-pink-400">
-          Save Changes
-        </button>
-        <button 
-          onClick={handleLogout}
-          className="w-full bg-gray-100 text-gray-600 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-        >
-          Logout
-        </button>
+        </div>
       </div>
     </div>
   );
 };
-
 // Main App Component
 export default function PetfectlyDashboard(): JSX.Element {
   const router = useRouter();
