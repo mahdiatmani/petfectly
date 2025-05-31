@@ -839,7 +839,6 @@ const MessagesContent: React.FC<MessagesContentProps> = ({ matches }) => {
   const [showSearch, setShowSearch] = useState(false);
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'unread', 'online'
-  const router = useRouter();
 
   const filteredMatches = matches.filter((pet) => {
     const matchesSearch = pet.name.toLowerCase().includes(searchTerm.toLowerCase());
